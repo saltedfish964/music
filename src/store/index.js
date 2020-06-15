@@ -5,6 +5,16 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    tabs: [
+      {
+        name: '发现',
+        path: '/home',
+      },
+      {
+        name: '视频',
+        path: '/video',
+      },
+    ],
   },
   mutations: {
   },
