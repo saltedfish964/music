@@ -15,14 +15,36 @@
             'aqn-play': $store.state.isPlay,
           }"
         src="../../assets/images/aqn.png"
+        v-show="!showLrc"
       >
       <div
         class="axo-wrap"
+        @click="showLrc = true"
         :class="{
-            'axo-play': $store.state.isPlay,
-          }"
+          'axo-play': $store.state.isPlay,
+        }"
+        v-show="!showLrc"
       >
         <img :src="$store.state.currentSong.image">
+      </div>
+      <div
+        class="lrc-wrap"
+        v-show="showLrc"
+        @click="showLrc = false"
+      >
+        <div
+          class="lrc-scroll"
+          :style="`margin-top: -${currentIndex * 30}px;`"
+        >
+          <div
+            class="lrc"
+            :class="{
+              'lrc-active': currentIndex === index,
+            }"
+            v-for="(item, index) in $store.state.currentSong.lrc"
+            :key="index"
+          >{{ item.lyrics }}</div>
+        </div>
       </div>
     </div>
     <div class="top-btn">
@@ -46,10 +68,19 @@
       <div class="time">{{ $store.state.musicMaxTime }}</div>
     </div>
     <div class="bottom-btn">
-      <van-icon class="iconfont my-iconcaozuo-xunhuan1 other"></van-icon>
+      <van-icon
+        class="iconfont other"
+        :class="{
+          'my-iconcaozuo-xunhuan1': $store.state.type === 0,
+          'my-iconsuijibofang': $store.state.type === 1,
+          'my-icondanquxunhuan': $store.state.type === 2,
+        }"
+        @click.stop="changeMode"
+      ></van-icon>
       <van-icon
         name="arrow-left"
         class="pre"
+        @click.stop="onPrev"
       />
       <van-icon
         :name="$store.state.isPlay ? 'pause-circle-o' : 'play-circle-o'"
@@ -59,6 +90,7 @@
       <van-icon
         name="arrow"
         class="next"
+        @click.stop="onNext"
       />
       <van-icon
         name="wap-nav"
@@ -71,6 +103,16 @@
 
 <script>
 export default {
+  data() {
+    return {
+      showLrc: false,
+    };
+  },
+  computed: {
+    currentIndex() {
+      return this.$store.state.lrcIndex;
+    },
+  },
   methods: {
     handlePlay() {
       this.$store.commit('setIsPlay', !this.$store.state.isPlay);
@@ -82,6 +124,15 @@ export default {
     },
     onChange(value) {
       this.$store.commit('sliderChange', value);
+    },
+    onNext() {
+      this.$store.commit('nextSong');
+    },
+    onPrev() {
+      this.$store.commit('prevSong');
+    },
+    changeMode() {
+      this.$store.commit('changeMode');
     },
   },
 };
@@ -144,6 +195,27 @@ export default {
         width: 40vw;
         height: 40vw;
         border-radius: 50%;
+      }
+    }
+    .lrc-wrap {
+      height: 100%;
+      color: #bbbbbb;
+      padding: 20px;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      .lrc-scroll {
+        transition: 0.5s all;
+        position: relative;
+        top: 50%;
+        .lrc {
+          text-align: center;
+          height: 30px;
+          line-height: 30px;
+        }
+        .lrc-active {
+          color: #ffffff;
+        }
       }
     }
   }

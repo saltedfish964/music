@@ -10,9 +10,21 @@
     >
       <div class="count">当前播放（{{ $store.state.songs.length }}）</div>
       <div class="ctrl">
-        <div class="mode">
-          <van-icon class="iconfont my-iconcaozuo-xunhuan1 icon other"></van-icon>
-          <div>列表循环</div>
+        <div
+          class="mode"
+          @click.stop="$store.commit('changeMode');"
+        >
+          <van-icon
+            class="iconfont icon other"
+            :class="{
+              'my-iconcaozuo-xunhuan1': $store.state.type === 0,
+              'my-iconsuijibofang': $store.state.type === 1,
+              'my-icondanquxunhuan': $store.state.type === 2,
+            }"
+          ></van-icon>
+          <div>
+            {{ $store.state.type === 0 ? '列表循环' : $store.state.type === 1 ? '随机播放' : '单曲循环'  }}
+          </div>
         </div>
         <van-icon
           name="delete"

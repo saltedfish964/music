@@ -28,6 +28,7 @@ export default {
     this.$nextTick(() => {
       if (this.$store.state.audio === null) {
         this.$store.commit('setAudio', this.$refs.audio);
+        this.$store.commit('initListentener');
         this.$store.commit('initSongs');
         this.$store.commit('initCurrentSong');
       }

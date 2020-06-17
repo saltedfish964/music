@@ -10,47 +10,52 @@
       @clear="resultList = []"
     />
     <div
-      class="result"
-      v-show="resultList.length"
+      class="scroll"
+      ref="scroll"
     >
-      <div class="title">搜索结果</div>
-      <div>
-        <div
-          class="result-item"
-          v-for="item in resultList"
-          :key="item.id"
-          @click="onPlayMusic(item)"
-        >
-          <van-icon
-            name="search"
-            class="result-icon"
-          />
-          {{ item.name }}
-        </div>
-      </div>
-    </div>
-    <div class="hot-result">
-      <div class="hot">热搜榜</div>
       <div
-        class="hot-item"
-        v-for="(item, index) in list"
-        :key="item.id"
-        @click="quickSearch(item.searchWord)"
+        class="result"
+        v-show="resultList.length"
       >
-        <div class="left">
-          <div class="num">{{ index += 1 }}</div>
-          <div>
-            <div class="search-word">
-              {{ item.searchWord }}
-              <img
-                class="icon"
-                :src="item.iconUrl"
-              />
-            </div>
-            <div class="content">{{ item.content }}</div>
+        <div class="title">搜索结果</div>
+        <div>
+          <div
+            class="result-item"
+            v-for="item in resultList"
+            :key="item.id"
+            @click="onPlayMusic(item)"
+          >
+            <van-icon
+              name="search"
+              class="result-icon"
+            />
+            {{ item.name }}
           </div>
         </div>
-        <div class="score">{{ item.score }}</div>
+      </div>
+      <div class="hot-result">
+        <div class="hot">热搜榜</div>
+        <div
+          class="hot-item"
+          v-for="(item, index) in list"
+          :key="item.id"
+          @click="quickSearch(item.searchWord)"
+        >
+          <div class="left">
+            <div class="num">{{ index += 1 }}</div>
+            <div>
+              <div class="search-word">
+                {{ item.searchWord }}
+                <img
+                  class="icon"
+                  :src="item.iconUrl"
+                />
+              </div>
+              <div class="content">{{ item.content }}</div>
+            </div>
+          </div>
+          <div class="score">{{ item.score }}</div>
+        </div>
       </div>
     </div>
   </section>
@@ -103,6 +108,7 @@ export default {
           if (this.value === '') {
             this.resultList = [];
           }
+          this.$refs.scroll.scrollTop = 0;
         } else {
           this.$toast(res.data.message);
         }
@@ -133,6 +139,12 @@ export default {
             id: item.id,
           },
         });
+        const lyrics = await this.$axios.get('/lyric', {
+          params: {
+            id: item.id,
+          },
+        });
+        obj.lrc = this.formatLyrics(lyrics.data.lrc.lyric);
         const detail = await this.$axios.get('/song/detail', {
           params: {
             ids: item.id,
@@ -150,6 +162,26 @@ export default {
       }
       this.$store.commit('setOverlay', false);
     },
+    formatLyrics(lyrics) {
+      const lrcList = lyrics.split('\n');
+      const lrc = [];
+      lrcList.forEach((lrcItem) => {
+        const oneLrc = lrcItem.split(']');
+        if (oneLrc[1]) {
+          const time = oneLrc[0].replace('[', '');
+          const timeSplit = time.split(':');
+          const second = Number(timeSplit[1]);
+          const minute = Number(timeSplit[0]);
+          const allSecond = second + (minute * 60);
+          const str = oneLrc[1];
+          lrc.push({
+            time: allSecond,
+            lyrics: str,
+          });
+        }
+      });
+      return lrc;
+    },
   },
 };
 </script>
@@ -157,64 +189,68 @@ export default {
 <style lang="less" scoped>
 .container {
   padding-bottom: 50px;
-  .result {
-    box-sizing: border-box;
-    padding: 0 12px;
-    color: #333333;
-    .title {
-      font-size: 13px;
-    }
-    .result-item {
-      min-height: 35px;
-      padding: 5px 0;
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #eeeeee;
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-    .result-icon {
-      line-height: 35px;
-      font-size: 18px;
-      margin-right: 15px;
-    }
-  }
-  .hot-result {
-    box-sizing: border-box;
-    padding: 0 12px;
-    .hot {
-      font-size: 13px;
-    }
-    .hot-item {
-      justify-content: space-between;
-      display: flex;
-      height: 50px;
+  .scroll {
+    overflow-y: auto;
+    height: calc(100vh - 104px);
+    .result {
+      box-sizing: border-box;
+      padding: 0 12px;
       color: #333333;
-      .left {
+      .title {
+        font-size: 13px;
+      }
+      .result-item {
+        min-height: 35px;
+        padding: 5px 0;
         display: flex;
         align-items: center;
-        .num {
-          line-height: 50px;
-          padding: 0 15px 0 5px;
-          text-align: center;
-        }
-        .search-word {
-          font-size: 16px;
-          line-height: 22px;
-          .icon {
-            height: 12px;
-          }
-        }
-        .content {
-          font-size: 12px;
-          color: #aaaaaa;
+        border-bottom: 1px solid #eeeeee;
+        &:last-child {
+          border-bottom: none;
         }
       }
-      .score {
-        font-size: 12px;
-        color: #aaaaaa;
-        margin-top: 10px;
+      .result-icon {
+        line-height: 35px;
+        font-size: 18px;
+        margin-right: 15px;
+      }
+    }
+    .hot-result {
+      box-sizing: border-box;
+      padding: 0 12px;
+      .hot {
+        font-size: 13px;
+      }
+      .hot-item {
+        justify-content: space-between;
+        display: flex;
+        height: 50px;
+        color: #333333;
+        .left {
+          display: flex;
+          align-items: center;
+          .num {
+            line-height: 50px;
+            padding: 0 15px 0 5px;
+            text-align: center;
+          }
+          .search-word {
+            font-size: 16px;
+            line-height: 22px;
+            .icon {
+              height: 12px;
+            }
+          }
+          .content {
+            font-size: 12px;
+            color: #aaaaaa;
+          }
+        }
+        .score {
+          font-size: 12px;
+          color: #aaaaaa;
+          margin-top: 10px;
+        }
       }
     }
   }
