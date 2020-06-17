@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="container">
     <div class="tab-wrap">
       <van-icon
         name="user-o"
@@ -22,7 +22,7 @@
         @click="$router.push('/search')"
       />
     </div>
-    <div>
+    <div class="view">
       <router-view />
     </div>
   </section>
@@ -38,29 +38,35 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.tab-wrap {
-  display: flex;
-  background: #ffffff;
-  .icon {
-    line-height: 44px;
-    font-size: 22px;
-    flex: 0 0 44px;
-    text-align: center;
-  }
-  .tab {
-    flex: 1;
+.container {
+  position: relative;
+  .tab-wrap {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    .tab-item {
-      margin: 0 10px;
-      width: 50px;
-      color: #333333;
+    background: #ffffff;
+    .icon {
+      line-height: 44px;
+      font-size: 22px;
+      flex: 0 0 44px;
       text-align: center;
     }
-    .active {
-      font-size: 20px;
+    .tab {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .tab-item {
+        margin: 0 10px;
+        width: 50px;
+        color: #333333;
+        text-align: center;
+      }
+      .active {
+        font-size: 20px;
+      }
     }
+  }
+  .view {
+    padding-bottom: 50px;
   }
 }
 </style>

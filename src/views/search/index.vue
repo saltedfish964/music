@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="container">
     <van-search
       v-model="value"
       show-action
@@ -19,6 +19,7 @@
           class="result-item"
           v-for="item in resultList"
           :key="item.id"
+          @click="onPlayMusic(item)"
         >
           <van-icon
             name="search"
@@ -111,69 +112,110 @@ export default {
       this.value = value;
       this.onSearch();
     },
+    async onPlayMusic(item) {
+      const obj = {};
+      obj.name = item.name;
+      obj.id = item.id;
+      this.$store.commit('setOverlay', true);
+      let check;
+      try {
+        check = await this.$axios.get('/check/music', {
+          params: {
+            id: item.id,
+          },
+        });
+      } catch (error) {
+        this.$toast('无版权');
+      }
+      if (check) {
+        const url = await this.$axios.get('/song/url', {
+          params: {
+            id: item.id,
+          },
+        });
+        const detail = await this.$axios.get('/song/detail', {
+          params: {
+            ids: item.id,
+          },
+        });
+        obj.image = detail.data.songs[0].al.picUrl;
+        obj.singer = detail.data.songs[0].ar[0].name;
+        obj.url = url.data.data[0].url;
+        if (url.data.code === 200) {
+          this.$store.commit('pushSong', obj);
+          this.$store.commit('setCurrentSong', obj);
+          this.$store.commit('setShowPlay', true);
+          this.$store.commit('playMusic');
+        }
+      }
+      this.$store.commit('setOverlay', false);
+    },
   },
 };
 </script>
 
 <style lang="less" scoped>
-.result {
-  box-sizing: border-box;
-  padding: 0 12px;
-  color: #333333;
-  .title {
-    font-size: 13px;
-  }
-  .result-item {
-    min-height: 35px;
-    padding: 5px 0;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #eeeeee;
-    &:last-child {
-      border-bottom: none;
-    }
-  }
-  .result-icon {
-    line-height: 35px;
-    font-size: 18px;
-    margin-right: 15px;
-  }
-}
-.hot-result {
-  box-sizing: border-box;
-  padding: 0 12px;
-  .hot {
-    font-size: 13px;
-  }
-  .hot-item {
-    justify-content: space-between;
-    display: flex;
-    height: 50px;
+.container {
+  padding-bottom: 50px;
+  .result {
+    box-sizing: border-box;
+    padding: 0 12px;
     color: #333333;
-    .left {
+    .title {
+      font-size: 13px;
+    }
+    .result-item {
+      min-height: 35px;
+      padding: 5px 0;
       display: flex;
       align-items: center;
-      .num {
-        line-height: 50px;
-        padding: 0 15px 0 5px;
-        text-align: center;
-      }
-      .search-word {
-        font-size: 16px;
-        line-height: 22px;
-        .icon {
-          height: 12px;
-        }
-      }
-      .content {
-        font-size: 12px;
-        color: #aaaaaa;
+      border-bottom: 1px solid #eeeeee;
+      &:last-child {
+        border-bottom: none;
       }
     }
-    .score {
-      font-size: 12px;
-      color: #aaaaaa;
-      margin-top: 10px;
+    .result-icon {
+      line-height: 35px;
+      font-size: 18px;
+      margin-right: 15px;
+    }
+  }
+  .hot-result {
+    box-sizing: border-box;
+    padding: 0 12px;
+    .hot {
+      font-size: 13px;
+    }
+    .hot-item {
+      justify-content: space-between;
+      display: flex;
+      height: 50px;
+      color: #333333;
+      .left {
+        display: flex;
+        align-items: center;
+        .num {
+          line-height: 50px;
+          padding: 0 15px 0 5px;
+          text-align: center;
+        }
+        .search-word {
+          font-size: 16px;
+          line-height: 22px;
+          .icon {
+            height: 12px;
+          }
+        }
+        .content {
+          font-size: 12px;
+          color: #aaaaaa;
+        }
+      }
+      .score {
+        font-size: 12px;
+        color: #aaaaaa;
+        margin-top: 10px;
+      }
     }
   }
 }
