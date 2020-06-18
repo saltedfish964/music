@@ -15,7 +15,9 @@
       </div>
       <div class="text">
         <div class="title">{{ $store.state.currentSong.name }}</div>
-        <div class="tips">{{ $store.state.currentSong.singer }}</div>
+        <div class="tips">
+          {{ $store.state.currentSong.lrc[$store.state.lrcIndex].lyrics }}
+        </div>
       </div>
     </div>
     <div class="right">
