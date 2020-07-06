@@ -19,6 +19,8 @@ import store from './store';
 import 'normalize.css';
 import './assets/css/icon.css';
 
+axios.defaults.baseURL = 'https://netease.bluej.cn';
+
 Vue.use(Icon);
 Vue.use(Search);
 Vue.use(Toast);

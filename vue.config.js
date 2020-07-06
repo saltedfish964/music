@@ -1,4 +1,6 @@
 module.exports = {
+  // publicPath: '/music/',
+  publicPath: './',
   devServer: {
     proxy: {
       '/': {

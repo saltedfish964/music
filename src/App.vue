@@ -40,6 +40,8 @@ export default {
 <style lang="less" scoped>
 .app {
   position: relative;
+  min-height: 100vh;
+  background: #ffffff;
   .player {
     position: fixed;
     bottom: 0;
