@@ -16,53 +16,57 @@ export default {
       obj.name = item.name;
       obj.id = item.id;
       this.$store.commit('setOverlay', true);
-      let check;
+      // 检查歌曲是否能播放
       try {
-        check = await this.$axios.get('/check/music', {
+        await this.$axios.get('/check/music', {
           params: {
             id: item.id,
           },
         });
       } catch (error) {
         this.$toast('无版权');
+        return;
       }
-      if (check) {
-        const url = await this.$axios.get('/song/url', {
-          params: {
-            id: item.id,
-          },
-        });
-        const lyrics = await this.$axios.get('/lyric', {
-          params: {
-            id: item.id,
-          },
-        });
-        let lyric = '';
-        if (lyrics.data.nolyric) {
-          lyric = '[00:00.000] 暂无歌词';
-        } else {
-          lyric = lyrics.data.lrc.lyric;
-        }
-        obj.lrc = this.formatLyrics(lyric);
-        const detail = await this.$axios.get('/song/detail', {
-          params: {
-            ids: item.id,
-          },
-        });
-        obj.image = detail.data.songs[0].al.picUrl;
-        obj.singer = detail.data.songs[0].ar[0].name;
-        obj.url = url.data.data[0].url;
-        if (url.data.code === 200) {
-          this.$store.commit('pushSong', obj);
-          this.$store.commit('setCurrentSong', obj);
-          this.$store.commit('setShowPlay', true);
-          this.$store.commit('playMusic');
-        }
+      // 获取歌曲详情
+      const url = await this.$axios.get('/song/url', {
+        params: {
+          id: item.id,
+        },
+      });
+      if (url.data.data[0].url === null) {
+        this.$toast('应版权方要求，完整播放必须开通 VIP');
+        this.$store.commit('setOverlay', false);
+        return;
+      }
+      // 获取歌词
+      const lyrics = await this.$axios.get('/lyric', {
+        params: {
+          id: item.id,
+        },
+      });
+      if (lyrics.data.nolyric) {
+        obj.lrc = this.formatLyrics();
+      } else {
+        obj.lrc = this.formatLyrics(lyrics.data.lrc.lyric);
+      }
+      const detail = await this.$axios.get('/song/detail', {
+        params: {
+          ids: item.id,
+        },
+      });
+      obj.image = detail.data.songs[0].al.picUrl;
+      obj.singer = detail.data.songs[0].ar[0].name;
+      obj.url = url.data.data[0].url;
+      if (url.data.code === 200) {
+        this.$store.commit('pushSong', obj);
+        this.$store.commit('setCurrentSong', obj);
+        this.$store.commit('setShowPlay', true);
+        this.$store.commit('playMusic');
       }
       this.$store.commit('setOverlay', false);
     },
     // 格式化歌词
-    formatLyrics(lyrics) {
+    formatLyrics(lyrics = '[00:00.000] 暂无歌词') {
       const lrcList = lyrics.split('\n');
       const lrc = [];
       lrcList.forEach((lrcItem) => {
@@ -80,6 +84,7 @@ export default {
           });
         }
       });
+
       return lrc;
     },
   },
