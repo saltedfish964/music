@@ -144,7 +144,13 @@ export default {
             id: item.id,
           },
         });
-        obj.lrc = this.formatLyrics(lyrics.data.lrc.lyric);
+        let lyric = '';
+        if (lyrics.data.nolyric) {
+          lyric = '[00:00.000] 暂无歌词';
+        } else {
+          lyric = lyrics.data.lrc.lyric;
+        }
+        obj.lrc = this.formatLyrics(lyric);
         const detail = await this.$axios.get('/song/detail', {
           params: {
             ids: item.id,
